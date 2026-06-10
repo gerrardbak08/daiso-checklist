@@ -635,6 +635,7 @@ function repaintAll(){
   }
   function initGoogleClient(){
     if(!_gisReady||!window.google||GOOGLE_CLIENT_ID.indexOf('YOUR_')===0) return;
+    if(location.protocol==='file:') return; // file:// 환경에서는 OAuth 불가
     _gClient=google.accounts.oauth2.initTokenClient({
       client_id:GOOGLE_CLIENT_ID,
       scope:'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive',
