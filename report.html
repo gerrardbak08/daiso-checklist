@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>매장 현장진단 보고서 | 아성다이소 안전보건팀</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.css">
+<style>
+:root{
+  --bg:#f4f6f8; --surface:#fff; --surface-2:#f0f2f5;
+  --border:#dde2e8; --border-2:#c9d0d8;
+  --text:#1a1f27; --text-2:#56606e; --text-3:#8a93a0;
+  --navy:#1f3864; --navy-2:#2e5496; --navy-soft:#e8eef7;
+  --ok:#1f7a43; --ok-bg:#e7f4ec;
+  --warn:#a65c00; --warn-bg:#fbf0dd;
+  --danger:#c0392b; --danger-bg:#fae9e6;
+  --radius:10px; --radius-sm:7px;
+  font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Malgun Gothic","맑은 고딕",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-size:15px;line-height:1.5}
+body{padding-bottom:60px}
+
+/* Header */
+header{position:sticky;top:0;z-index:40;background:var(--navy);color:#fff;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(20,30,45,.12)}
+.hd-title{font-size:15px;font-weight:700;letter-spacing:-.2px}
+.hd-title small{display:block;font-size:11px;font-weight:500;color:#b9c6dc;margin-top:1px}
+.hd-actions{display:flex;gap:8px;flex-shrink:0}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:#fff;font-family:inherit;transition:background .15s}
+.btn:hover{background:rgba(255,255,255,.22)}
+.btn-print{background:rgba(255,255,255,.18)}
+
+/* Layout */
+.wrap{max-width:1000px;margin:0 auto;padding:20px 16px}
+
+/* Loading */
+#loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;gap:16px;color:var(--text-2)}
+.spinner{width:40px;height:40px;border:3px solid var(--border-2);border-top-color:var(--navy-2);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#errMsg{display:none;background:var(--danger-bg);border:1px solid #f0c4bd;border-radius:var(--radius);padding:20px;color:var(--danger);font-size:14px;text-align:center}
+
+/* Section */
+.rpt-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 1px 3px rgba(20,30,45,.07);margin-bottom:20px;overflow:hidden}
+.rpt-hd{padding:14px 18px;border-bottom:1px solid var(--border);background:var(--surface-2);display:flex;align-items:center;gap:10px}
+.rpt-hd .icon{font-size:17px}
+.rpt-hd h2{margin:0;font-size:15px;font-weight:700;letter-spacing:-.2px;flex:1}
+.rpt-hd .sub{font-size:12px;color:var(--text-3);margin-top:1px}
+.rpt-body{padding:16px 18px}
+
+/* KPI Cards */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:700px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:400px){.kpi-grid{grid-template-columns:1fr 1fr}}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center}
+.kpi.danger{border-color:#f0c4bd;background:var(--danger-bg)}
+.kpi.warn{border-color:#f5d9a8;background:var(--warn-bg)}
+.kpi.ok{border-color:#a8d9bb;background:var(--ok-bg)}
+.kpi-label{font-size:11.5px;font-weight:600;color:var(--text-2);margin-bottom:6px}
+.kpi-val{font-size:32px;font-weight:800;letter-spacing:-1px;line-height:1}
+.kpi.danger .kpi-val{color:var(--danger)}
+.kpi.warn .kpi-val{color:var(--warn)}
+.kpi.ok .kpi-val{color:var(--ok)}
+.kpi-sub{font-size:11px;color:var(--text-3);margin-top:5px}
+
+/* Grade distribution bar */
+.grade-dist{display:flex;height:28px;border-radius:6px;overflow:hidden;margin:16px 0 8px;gap:1px}
+.grade-dist .seg{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;transition:width .4s;min-width:0;overflow:hidden}
+.grade-dist .seg.a{background:#c0392b}
+.grade-dist .seg.b{background:#e67e22}
+.grade-dist .seg.c{background:#7f8c8d}
+.grade-dist .seg.ok{background:#27ae60}
+.grade-legend{display:flex;gap:14px;flex-wrap:wrap}
+.gl-item{display:flex;align-items:center;gap:5px;font-size:12px}
+.gl-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+
+/* Table */
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:var(--surface-2);color:var(--text-2);font-size:11.5px;font-weight:700;padding:8px 10px;text-align:left;border-bottom:2px solid var(--border-2);white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--border)}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--surface-2)}
+td{padding:9px 10px;vertical-align:middle}
+td.num{text-align:center;font-weight:700}
+.grade-badge{display:inline-block;padding:3px 9px;border-radius:5px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.grade-badge.ga{background:var(--danger-bg);color:var(--danger)}
+.grade-badge.gb{background:var(--warn-bg);color:var(--warn)}
+.grade-badge.gc{background:#eceff2;color:#56606e}
+.grade-badge.gok{background:var(--ok-bg);color:var(--ok)}
+
+/* Bar chart */
+.bar-row{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid var(--border)}
+.bar-row:last-child{border-bottom:none}
+.bar-name{width:160px;flex-shrink:0;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-wrap{flex:1;position:relative;height:20px;background:var(--surface-2);border-radius:4px;overflow:hidden}
+.bar-fill{position:absolute;left:0;top:0;height:100%;background:var(--danger);border-radius:4px;transition:width .4s}
+.bar-fill.b{background:#e67e22}
+.bar-fill.c{background:#7f8c8d}
+.bar-cnt{width:32px;text-align:right;font-size:12.5px;font-weight:700;flex-shrink:0}
+.bar-pct{width:38px;text-align:right;font-size:11.5px;color:var(--text-3);flex-shrink:0}
+.cat-tag{display:inline-block;font-size:10px;font-weight:600;padding:1px 5px;border-radius:4px;margin-left:4px;vertical-align:middle;background:var(--navy-soft);color:var(--navy-2)}
+
+/* Urgent table */
+.urgent-row{background:#fff8f7}
+.urgent-row td{vertical-align:top}
+.immediate-txt{font-size:12px;color:var(--danger);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Inspector table */
+.inspector-name{font-weight:600}
+
+/* Accordion (Section 7) */
+.accordion{border-top:1px solid var(--border)}
+.ac-item{border-bottom:1px solid var(--border)}
+.ac-item:last-child{border-bottom:none}
+.ac-hd{width:100%;background:none;border:none;padding:12px 14px;text-align:left;font-family:inherit;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ac-hd:hover{background:var(--surface-2)}
+.ac-hd .ac-store{flex:1}
+.ac-hd .ac-grade{font-size:11.5px;font-weight:700}
+.ac-hd .ac-toggle{font-size:16px;color:var(--text-3);transition:transform .2s;flex-shrink:0}
+.ac-body{display:none;padding:12px 14px 14px;font-size:13px;line-height:1.65;color:var(--text-2);background:var(--surface-2);border-top:1px solid var(--border)}
+.ac-body.open{display:block}
+
+/* Print */
+@media print{
+  header .hd-actions{display:none}
+  body{background:#fff}
+  .rpt-section{box-shadow:none;break-inside:avoid;page-break-inside:avoid}
+  .accordion .ac-body{display:block!important}
+  @page{size:A4 portrait;margin:15mm}
+}
+
+/* Empty state */
+.empty{text-align:center;color:var(--text-3);font-size:13px;padding:30px 0}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hd-title">
+    매장 현장진단 보고서
+    <small>아성다이소 안전보건팀</small>
+  </div>
+  <div class="hd-actions">
+    <button class="btn" id="btnRefresh" onclick="loadReport()">↺ 새로고침</button>
+    <button class="btn btn-print" onclick="window.print()">🖨 인쇄</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <div id="loading">
+    <div class="spinner"></div>
+    <div>데이터 불러오는 중…</div>
+  </div>
+  <div id="errMsg"></div>
+  <div id="reportWrap" style="display:none"></div>
+</div>
+
+<script>
+var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyMTkeq1T1PbnL-G7M6VuiAmM8L4FtWGE2RTS9x61NrszErM3ECryilFHE5XMJ_fHIQ/exec';
+
+var COL = {
+  timestamp:0, store:1, witness:2, inspector:3, date:4,
+  grade:5, totalNg:6, countA:7, countB:8, countC:9,
+  // items: col 10~51 (14 items × 3 fields each)
+  summary:52, immediate:53
+};
+
+var ITEM_NAMES = [
+  '계단 추락 개방 틈새','계단 측면 방호 설치','난간 살(간살) 간격','난간·핸드레일 높이',
+  '추락방지망 설치','영유아 등반 요소','손잡이 연속·고정','계단부 조도',
+  '피난통로 폭 확보','비상구 개방 가능','비상구 장애물','방화문 폐쇄 상태',
+  '사다리 외관 결함','사다리 작업 높이'
+];
+var ITEM_CATEGORY = [
+  '추락·전도','추락·전도','추락·전도','추락·전도',
+  '추락·전도','추락·전도','추락·전도','추락·전도',
+  '화재','화재','화재','화재',
+  '고소작업','고소작업'
+];
+
+function parseRisk(val){
+  var s = String(val).trim();
+  if(s==='3점'||s==='3') return 3;
+  if(s==='2점'||s==='2') return 2;
+  if(s==='1점'||s==='1') return 1;
+  return 0;
+}
+
+function gradeBadge(g){
+  var s = String(g);
+  if(s.indexOf('A')>-1) return '<span class="grade-badge ga">'+esc(s)+'</span>';
+  if(s.indexOf('B')>-1) return '<span class="grade-badge gb">'+esc(s)+'</span>';
+  if(s.indexOf('C')>-1) return '<span class="grade-badge gc">'+esc(s)+'</span>';
+  return '<span class="grade-badge gok">'+esc(s)+'</span>';
+}
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function fmtDate(v){
+  if(!v) return '—';
+  var s = String(v);
+  // Date object from sheets comes as string like "Mon Jun 09 2026..."
+  var d = new Date(v);
+  if(!isNaN(d.getTime())) return d.getFullYear()+'.'+(d.getMonth()+1).toString().padStart(2,'0')+'.'+d.getDate().toString().padStart(2,'0');
+  return s.slice(0,10);
+}
+
+function loadReport(){
+  document.getElementById('loading').style.display='flex';
+  document.getElementById('reportWrap').style.display='none';
+  document.getElementById('errMsg').style.display='none';
+
+  fetch(APPS_SCRIPT_URL+'?action=report')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      document.getElementById('loading').style.display='none';
+      if(!d.ok){ showErr('데이터 오류: '+(d.error||'알 수 없음')); return; }
+      renderReport(d.rows || []);
+    })
+    .catch(function(e){
+      document.getElementById('loading').style.display='none';
+      showErr('네트워크 오류: '+e.message);
+    });
+}
+
+function showErr(msg){
+  var el = document.getElementById('errMsg');
+  el.textContent = msg;
+  el.style.display='block';
+}
+
+function renderReport(rows){
+  var wrap = document.getElementById('reportWrap');
+  wrap.innerHTML = '';
+  wrap.style.display='block';
+
+  if(rows.length===0){
+    wrap.innerHTML='<div class="rpt-section"><div class="rpt-body"><div class="empty">아직 제출된 점검 데이터가 없습니다.</div></div></div>';
+    return;
+  }
+
+  // Sort by grade severity
+  var gradeOrder = {'A(긴급)':0,'B(높음)':1,'C(관찰)':2,'이상없음':3};
+  var sorted = rows.slice().sort(function(a,b){
+    var ga = gradeOrder[String(a[COL.grade])]||9;
+    var gb = gradeOrder[String(b[COL.grade])]||9;
+    return ga-gb;
+  });
+
+  wrap.appendChild(buildSection1(rows));
+  wrap.appendChild(buildSection5(rows));   // 긴급 먼저
+  wrap.appendChild(buildSection2(sorted));
+  wrap.appendChild(buildSection3(rows));
+  wrap.appendChild(buildSection4(rows));
+  wrap.appendChild(buildSection6(rows));
+  wrap.appendChild(buildSection7(sorted));
+}
+
+/* Section 1: 전체 현황 KPI */
+function buildSection1(rows){
+  var gc = {'A(긴급)':0,'B(높음)':0,'C(관찰)':0,'이상없음':0};
+  var totalNg=0, totalA=0;
+  rows.forEach(function(r){
+    var g = String(r[COL.grade]);
+    if(gc[g]!==undefined) gc[g]++;
+    else gc['이상없음']++;  // fallback
+    totalNg += Number(r[COL.totalNg])||0;
+    totalA  += Number(r[COL.countA])||0;
+  });
+  var total = rows.length;
+  var pct = function(n){ return total>0?Math.round(n/total*100):0; };
+
+  var sec = mkSec('전체 현황 요약','📊','총 '+total+'개 매장 점검 결과');
+
+  var kpi = '<div class="kpi-grid">';
+  kpi += kpiCard(total,'점검 완료','/ 40개 매장','');
+  kpi += kpiCard(gc['A(긴급)'],'긴급A 매장','즉시조치 필요','danger');
+  kpi += kpiCard(gc['B(높음)'],'시급B 매장','1개월 내 개선','warn');
+  kpi += kpiCard(totalNg,'총 부적합건수','전 매장 누계','');
+  kpi += '</div>';
+
+  // Grade distribution bar
+  var dist = '<div class="grade-dist">';
+  var segs=[
+    {cls:'a',n:gc['A(긴급)'],label:'A'},
+    {cls:'b',n:gc['B(높음)'],label:'B'},
+    {cls:'c',n:gc['C(관찰)'],label:'C'},
+    {cls:'ok',n:gc['이상없음'],label:'OK'}
+  ];
+  segs.forEach(function(s){
+    var w = total>0?Math.round(s.n/total*100):0;
+    if(w>0) dist+='<div class="seg '+s.cls+'" style="width:'+w+'%">'+s.label+' '+s.n+'</div>';
+  });
+  dist+='</div>';
+  dist+='<div class="grade-legend">';
+  [
+    {cls:'a',color:'#c0392b',label:'A(긴급) — '+gc['A(긴급)']+'개'},
+    {cls:'b',color:'#e67e22',label:'B(높음) — '+gc['B(높음)']+'개'},
+    {cls:'c',color:'#7f8c8d',label:'C(관찰) — '+gc['C(관찰)']+'개'},
+    {cls:'ok',color:'#27ae60',label:'이상없음 — '+gc['이상없음']+'개'}
+  ].forEach(function(it){
+    dist+='<div class="gl-item"><div class="gl-dot" style="background:'+it.color+'"></div>'+esc(it.label)+'</div>';
+  });
+  dist+='</div>';
+
+  sec.querySelector('.rpt-body').innerHTML = kpi + dist;
+  return sec;
+}
+
+function kpiCard(val,label,sub,cls){
+  return '<div class="kpi'+(cls?' '+cls:'')+'"><div class="kpi-label">'+esc(label)+'</div>'
+    +'<div class="kpi-val">'+val+'</div>'
+    +'<div class="kpi-sub">'+esc(sub)+'</div></div>';
+}
+
+/* Section 2: 매장별 등급 테이블 */
+function buildSection2(rows){
+  var sec = mkSec('매장별 등급 현황','🏪','등급 심각순 정렬');
+  var html = '<div class="tbl-wrap"><table><thead><tr>'
+    +'<th>매장명</th><th>진단일자</th><th>진단위원</th><th>종합등급</th>'
+    +'<th style="text-align:center">긴급A</th><th style="text-align:center">시급B</th>'
+    +'<th style="text-align:center">관찰C</th><th style="text-align:center">부적합합계</th>'
+    +'</tr></thead><tbody>';
+
+  rows.forEach(function(r){
+    html+='<tr'+(String(r[COL.grade]).indexOf('A')>-1?' class="urgent-row"':'')+'>'
+      +'<td><strong>'+esc(r[COL.store])+'</strong></td>'
+      +'<td style="white-space:nowrap">'+fmtDate(r[COL.date])+'</td>'
+      +'<td>'+esc(r[COL.inspector])+'</td>'
+      +'<td>'+gradeBadge(r[COL.grade])+'</td>'
+      +'<td class="num" style="color:'+(Number(r[COL.countA])>0?'var(--danger)':'var(--text-3)')+'">'+((Number(r[COL.countA])||0)||'—')+'</td>'
+      +'<td class="num" style="color:'+(Number(r[COL.countB])>0?'var(--warn)':'var(--text-3)')+'">'+((Number(r[COL.countB])||0)||'—')+'</td>'
+      +'<td class="num">'+((Number(r[COL.countC])||0)||'—')+'</td>'
+      +'<td class="num"><strong>'+((Number(r[COL.totalNg])||0)||'—')+'</strong></td>'
+      +'</tr>';
+  });
+  html+='</tbody></table></div>';
+  sec.querySelector('.rpt-body').innerHTML = html;
+  return sec;
+}
+
+/* Section 3: 취약 항목 TOP 10 */
+function buildSection3(rows){
+  var counts = ITEM_NAMES.map(function(){ return {ng:0,a:0}; });
+  rows.forEach(function(r){
+    for(var i=0;i<14;i++){
+      var base = 10+i*3;
+      if(String(r[base])==='부적합'){
+        counts[i].ng++;
+        if(parseRisk(r[base+1])===3) counts[i].a++;
+      }
+    }
+  });
+  var ranked = counts.map(function(c,i){
+    return {name:ITEM_NAMES[i],cat:ITEM_CATEGORY[i],ng:c.ng,a:c.a};
+  }).sort(function(a,b){ return b.ng-a.ng; }).slice(0,10);
+
+  var maxNg = ranked.length>0?ranked[0].ng:1;
+  var total = rows.length;
+
+  var sec = mkSec('취약 항목 TOP 10','⚠️','부적합 적발 빈도 순위 (전체 '+total+'개 매장)');
+  var html='';
+
+  ranked.forEach(function(it,idx){
+    var w = maxNg>0?Math.round(it.ng/maxNg*100):0;
+    var pct = total>0?Math.round(it.ng/total*100):0;
+    html+='<div class="bar-row">'
+      +'<div class="bar-name"><strong>'+(idx+1)+'.</strong> '+esc(it.name)
+      +'<span class="cat-tag">'+esc(it.cat)+'</span></div>'
+      +'<div class="bar-wrap"><div class="bar-fill'+(it.a>0?'':' b')+'" style="width:'+w+'%"></div></div>'
+      +'<div class="bar-cnt">'+it.ng+'건</div>'
+      +'<div class="bar-pct">'+pct+'%</div>'
+      +'</div>';
+  });
+
+  if(!html) html='<div class="empty">부적합 항목이 없습니다.</div>';
+  sec.querySelector('.rpt-body').innerHTML = html;
+  return sec;
+}
+
+/* Section 4: 진단위원별 현황 */
+function buildSection4(rows){
+  var map={};
+  rows.forEach(function(r){
+    var name=String(r[COL.inspector])||'(미입력)';
+    if(!map[name]) map[name]={count:0,ng:0,a:0,b:0,c:0};
+    var m=map[name];
+    m.count++; m.ng+=Number(r[COL.totalNg])||0;
+    m.a+=Number(r[COL.countA])||0;
+    m.b+=Number(r[COL.countB])||0;
+    m.c+=Number(r[COL.countC])||0;
+  });
+
+  var sec = mkSec('진단위원별 현황','👤','위원별 점검 매장 수 및 적발 현황');
+  var html='<div class="tbl-wrap"><table><thead><tr>'
+    +'<th>진단위원</th><th style="text-align:center">점검 매장</th>'
+    +'<th style="text-align:center">긴급A</th><th style="text-align:center">시급B</th>'
+    +'<th style="text-align:center">관찰C</th><th style="text-align:center">부적합합계</th>'
+    +'<th style="text-align:center">매장당 평균</th>'
+    +'</tr></thead><tbody>';
+
+  Object.keys(map).sort(function(a,b){return map[b].ng-map[a].ng;}).forEach(function(name){
+    var m=map[name];
+    var avg=m.count>0?(m.ng/m.count).toFixed(1):0;
+    html+='<tr>'
+      +'<td class="inspector-name">'+esc(name)+'</td>'
+      +'<td class="num">'+m.count+'</td>'
+      +'<td class="num" style="color:'+(m.a>0?'var(--danger)':'inherit')+'">'+m.a+'</td>'
+      +'<td class="num" style="color:'+(m.b>0?'var(--warn)':'inherit')+'">'+m.b+'</td>'
+      +'<td class="num">'+m.c+'</td>'
+      +'<td class="num"><strong>'+m.ng+'</strong></td>'
+      +'<td class="num">'+avg+'</td>'
+      +'</tr>';
+  });
+  html+='</tbody></table></div>';
+  sec.querySelector('.rpt-body').innerHTML=html;
+  return sec;
+}
+
+/* Section 5: 긴급조치 필요 매장 */
+function buildSection5(rows){
+  var urgent=rows.filter(function(r){ return String(r[COL.grade]).indexOf('A')>-1; });
+  var sec=mkSec('긴급조치 필요 매장','🚨','종합등급 A(긴급) 매장 — 즉시 후속 조치 필요 ('+urgent.length+'개)');
+
+  if(urgent.length===0){
+    sec.querySelector('.rpt-body').innerHTML='<div class="empty" style="color:var(--ok)">긴급 등급 매장 없음 ✓</div>';
+    return sec;
+  }
+
+  var html='<div class="tbl-wrap"><table><thead><tr>'
+    +'<th>매장명</th><th>진단일자</th><th>진단위원</th>'
+    +'<th style="text-align:center">긴급A건</th><th>즉시조치 내역</th>'
+    +'</tr></thead><tbody>';
+
+  urgent.forEach(function(r){
+    var imm=String(r[COL.immediate]||'—');
+    html+='<tr class="urgent-row">'
+      +'<td><strong>'+esc(r[COL.store])+'</strong></td>'
+      +'<td style="white-space:nowrap">'+fmtDate(r[COL.date])+'</td>'
+      +'<td>'+esc(r[COL.inspector])+'</td>'
+      +'<td class="num" style="color:var(--danger)"><strong>'+((Number(r[COL.countA])||0))+'</strong></td>'
+      +'<td><div class="immediate-txt" title="'+esc(imm)+'">'+esc(imm.length>60?imm.slice(0,60)+'…':imm)+'</div></td>'
+      +'</tr>';
+  });
+  html+='</tbody></table></div>';
+  sec.querySelector('.rpt-body').innerHTML=html;
+  return sec;
+}
+
+/* Section 6: 카테고리별 집중도 */
+function buildSection6(rows){
+  var cats={'추락·전도':0,'화재':0,'고소작업':0};
+  rows.forEach(function(r){
+    for(var i=0;i<14;i++){
+      var base=10+i*3;
+      if(String(r[base])==='부적합') cats[ITEM_CATEGORY[i]]++;
+    }
+  });
+  var total=cats['추락·전도']+cats['화재']+cats['고소작업'];
+
+  var sec=mkSec('카테고리별 부적합 집중도','📋','안전 예산 배분 및 개선 우선순위 근거');
+  var html='<div class="grade-dist" style="height:32px;margin-bottom:16px">';
+  var catColors={'추락·전도':'#c0392b','화재':'#e67e22','고소작업':'#2980b9'};
+  Object.keys(cats).forEach(function(k){
+    var w=total>0?Math.round(cats[k]/total*100):0;
+    if(w>0) html+='<div class="seg" style="background:'+catColors[k]+';width:'+w+'%">'+k+' '+cats[k]+'</div>';
+  });
+  html+='</div>';
+
+  html+='<div class="tbl-wrap"><table><thead><tr>'
+    +'<th>카테고리</th><th style="text-align:center">부적합건수</th><th style="text-align:center">비율</th><th>포함 항목</th>'
+    +'</tr></thead><tbody>';
+
+  var catItems={
+    '추락·전도':'계단 틈새/방호/난간/추락망/영유아/손잡이/조도',
+    '화재':'피난통로/비상구 2개/방화문',
+    '고소작업':'사다리 외관/작업높이'
+  };
+  Object.keys(cats).forEach(function(k){
+    var pct=total>0?Math.round(cats[k]/total*100):0;
+    html+='<tr>'
+      +'<td><strong style="color:'+catColors[k]+'">'+esc(k)+'</strong></td>'
+      +'<td class="num"><strong>'+cats[k]+'</strong></td>'
+      +'<td class="num">'+pct+'%</td>'
+      +'<td style="font-size:12px;color:var(--text-2)">'+esc(catItems[k])+'</td>'
+      +'</tr>';
+  });
+  html+='</tbody></table></div>';
+  sec.querySelector('.rpt-body').innerHTML=html;
+  return sec;
+}
+
+/* Section 7: 종합의견 원문 */
+function buildSection7(rows){
+  var sec=mkSec('종합의견 원문 (부록)','📝','진단위원 서술 의견 전문 — 클릭하여 펼치기');
+  var html='<div class="accordion">';
+
+  rows.forEach(function(r,i){
+    var summary=String(r[COL.summary]||'').trim();
+    var g=String(r[COL.grade]);
+    if(!summary) summary='(종합의견 없음)';
+    html+='<div class="ac-item">'
+      +'<button class="ac-hd" onclick="toggleAc(this)">'
+      +'<span class="ac-store">'+esc(r[COL.store])+'</span>'
+      +gradeBadge(g)
+      +'<span class="ac-toggle">▾</span>'
+      +'</button>'
+      +'<div class="ac-body">'+esc(summary)+'</div>'
+      +'</div>';
+  });
+  html+='</div>';
+  sec.querySelector('.rpt-body').style.padding='0';
+  sec.querySelector('.rpt-body').innerHTML=html;
+  return sec;
+}
+
+function toggleAc(btn){
+  var body=btn.nextElementSibling;
+  var toggle=btn.querySelector('.ac-toggle');
+  if(body.classList.contains('open')){
+    body.classList.remove('open');
+    toggle.style.transform='';
+  } else {
+    body.classList.add('open');
+    toggle.style.transform='rotate(180deg)';
+  }
+}
+
+function mkSec(title,icon,sub){
+  var sec=document.createElement('div');
+  sec.className='rpt-section';
+  sec.innerHTML='<div class="rpt-hd">'
+    +'<span class="icon">'+icon+'</span>'
+    +'<div><h2>'+esc(title)+'</h2><div class="sub">'+esc(sub)+'</div></div>'
+    +'</div>'
+    +'<div class="rpt-body"></div>';
+  return sec;
+}
+
+loadReport();
+</script>
+</body>
+</html>

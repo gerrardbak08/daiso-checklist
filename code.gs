@@ -78,6 +78,23 @@ function doGet(e) {
     }
   }
 
+  // 전체 데이터 반환 (보고서 생성용)
+  if (action === 'report') {
+    try {
+      var ss    = SpreadsheetApp.openById(SPREADSHEET_ID);
+      var sheet = ss.getSheetByName(SHEET_NAME);
+      if (!sheet) return respond({ ok: true, count: 0, rows: [] });
+      var lastRow = sheet.getLastRow();
+      if (lastRow < 1) return respond({ ok: true, count: 0, rows: [] });
+      var lastCol = Math.max(sheet.getLastColumn(), 54);
+      var values  = sheet.getRange(1, 1, lastRow, lastCol).getValues();
+      var rows    = values.filter(function(r) { return r[1] && String(r[1]).trim() !== ''; });
+      return respond({ ok: true, count: rows.length, rows: rows });
+    } catch(err) {
+      return respond({ ok: false, error: err.toString() });
+    }
+  }
+
   // 시트 접근 확인
   if (action === 'check') {
     try {
