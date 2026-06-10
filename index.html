@@ -30,8 +30,7 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-size:16px;line-height:1.45}
 html{overflow-x:hidden;overflow-y:auto}
-body{padding-bottom:calc(130px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch;overflow-x:hidden}
-@media(min-width:561px){body{padding-bottom:180px}}
+body{padding-bottom:40px;-webkit-overflow-scrolling:touch;overflow-x:hidden}
 header{position:sticky;top:0;z-index:40;background:var(--navy);color:#fff;box-shadow:0 2px 8px rgba(20,30,45,.10)}
 .hd-inner{max-width:860px;margin:0 auto;width:100%}
 .hd-top{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px}
@@ -135,12 +134,11 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--navy-2);outline-
 .verdict.A .vg{background:var(--danger)}.verdict.B .vg{background:var(--warn)}.verdict.C .vg{background:var(--na-bg);color:var(--na)}.verdict.OK .vg{background:var(--ok)}
 .verdict .vt b{font-size:15px}.verdict .vt span{display:block;font-size:12.5px;color:var(--text-2);margin-top:2px}
 /* ===== 하단 ===== */
-.actionbar{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--surface);
-  border-top:1px solid var(--border);box-shadow:0 -2px 12px rgba(20,30,45,.10);
-  padding:10px 14px;padding-bottom:calc(10px + env(safe-area-inset-bottom));
-  display:flex;flex-direction:column;gap:7px}
+.actionbar{margin-top:16px;background:var(--surface);
+  border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 1px 2px rgba(20,30,45,.06);
+  padding:14px;display:flex;flex-direction:column;gap:8px}
 .ab-row1{display:flex;align-items:center;gap:8px}
-.ab-row2{display:flex;gap:8px}
+.ab-row2{display:none}
 .save-state{flex-shrink:0;font-size:12px;color:var(--text-3);display:flex;align-items:center;gap:6px;max-width:80px;overflow:hidden}
 .save-state .dot{width:8px;height:8px;border-radius:50%;background:var(--ok);flex-shrink:0}
 .save-state.dirty .dot{background:var(--warn)}
@@ -153,15 +151,9 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--navy-2);outline-
   flex:1;min-height:52px;font-size:15px;letter-spacing:-.2px}
 .btn.ghost{color:var(--text-2)}
 .btn.sec{flex:1;min-height:42px;font-size:13px;color:var(--text-3);border-color:var(--border);background:var(--surface-2)}
-#toast{position:fixed;left:50%;bottom:calc(135px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(10px);z-index:60;background:var(--ok);color:#fff;font-size:13.5px;font-weight:700;padding:11px 18px;border-radius:999px;box-shadow:0 2px 8px rgba(20,30,45,.10);opacity:0;pointer-events:none;transition:.2s}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(10px);z-index:60;background:var(--ok);color:#fff;font-size:13.5px;font-weight:700;padding:11px 18px;border-radius:999px;box-shadow:0 2px 8px rgba(20,30,45,.10);opacity:0;pointer-events:none;transition:.2s}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .tip{font-size:11.5px;color:var(--text-3);line-height:1.5;padding:0 15px 14px}
-@media(min-width:561px){
-  .actionbar{bottom:16px;left:50%;right:auto;transform:translateX(-50%);
-    border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 4px 20px rgba(20,30,45,.12);
-    padding:14px;width:calc(100% - 28px);max-width:860px;gap:8px}
-  #toast{bottom:180px}
-}
 /* ===== 부록 ===== */
 details.lawref summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:13px 15px;background:var(--surface-2);font-weight:700;font-size:15px}
 details.lawref summary::-webkit-details-marker{display:none}
@@ -244,7 +236,50 @@ details.lawref[open] summary .tg::after{content:'접기'}details.lawref summary 
   <div class="section">
     <div class="sec-hd"><span class="no">0</span><h2>매장 · 진단 정보</h2></div>
     <div class="meta-grid">
-      <div class="field"><label>매장명 <span class="req">*</span></label><input type="text" id="m_store" placeholder="예) 부산안락교차로점"></div>
+      <div class="field"><label>매장명 <span class="req">*</span></label>
+        <select id="m_store">
+          <option value="">-- 선택 --</option>
+          <option value="방이시장점">방이시장점</option>
+          <option value="명동본점">명동본점</option>
+          <option value="용산아이파크몰점">용산아이파크몰점</option>
+          <option value="남영역점">남영역점</option>
+          <option value="송파구청점">송파구청점</option>
+          <option value="부산안락교차로점">부산안락교차로점</option>
+          <option value="오목교점">오목교점</option>
+          <option value="구로시장점">구로시장점</option>
+          <option value="내방역점">내방역점</option>
+          <option value="사당2호점">사당2호점</option>
+          <option value="서울대입구점">서울대입구점</option>
+          <option value="수원망포점">수원망포점</option>
+          <option value="안성2호점">안성2호점</option>
+          <option value="봉천2호점">봉천2호점</option>
+          <option value="난곡사거리점">난곡사거리점</option>
+          <option value="신림점">신림점</option>
+          <option value="홈플러스영등포점">홈플러스영등포점</option>
+          <option value="인천검암점">인천검암점</option>
+          <option value="답십리점">답십리점</option>
+          <option value="방배역점">방배역점</option>
+          <option value="독산점">독산점</option>
+          <option value="대전용문점">대전용문점</option>
+          <option value="대전오류점">대전오류점</option>
+          <option value="대전노은점">대전노은점</option>
+          <option value="수원역점">수원역점</option>
+          <option value="동탄점">동탄점</option>
+          <option value="우장산역점">우장산역점</option>
+          <option value="인천모래내시장점">인천모래내시장점</option>
+          <option value="간석점">간석점</option>
+          <option value="화곡역점">화곡역점</option>
+          <option value="목동역점">목동역점</option>
+          <option value="불광역점">불광역점</option>
+          <option value="잠실점">잠실점</option>
+          <option value="오류동점">오류동점</option>
+          <option value="당산점">당산점</option>
+          <option value="신정네거리점">신정네거리점</option>
+          <option value="안양역점">안양역점</option>
+          <option value="구리2호점">구리2호점</option>
+          <option value="합정동점">합정동점</option>
+          <option value="신촌명물거리점">신촌명물거리점</option>
+        </select></div>
       <div class="field"><label>점장/부점장 입회 확인</label><input type="text" id="m_witness" placeholder="입회자 성명"></div>
       <div class="field"><label>진단위원 <span class="req">*</span></label>
         <select id="m_inspector">
@@ -253,7 +288,6 @@ details.lawref[open] summary .tg::after{content:'접기'}details.lawref summary 
           <option value="강동현">강동현</option>
           <option value="유준하">유준하</option>
           <option value="서유림">서유림</option>
-          <option value="박윤하">박윤하</option>
           <option value="윤정인">윤정인</option>
         </select></div>
       <div class="field"><label>진단일자</label><input type="date" id="m_date"></div>
@@ -319,10 +353,7 @@ details.lawref[open] summary .tg::after{content:'접기'}details.lawref summary 
     <div class="save-state" id="saveState"><span class="dot"></span><span id="saveTxt">자동 저장 대기</span></div>
     <button class="btn ghost" id="btnNew">새 매장</button>
     <button class="btn primary" id="btnSubmit">☁ Google Drive 저장</button>
-  </div>
-  <div class="ab-row2">
-    <button class="btn sec" id="btnPrint">인쇄</button>
-    <button class="btn sec" id="btnExport">CSV 내보내기</button>
+    <button class="btn" id="btnAutoTest" style="background:var(--danger);color:#fff;border-color:var(--danger)">개발용 자동 테스트 3회 실행</button>
   </div>
 </div>
 <div id="toast"></div>
@@ -625,6 +656,85 @@ function repaintAll(){
     // 조용한 재연결 시도 (이미 동의한 경우 팝업 없이 토큰 발급)
     _gClient.requestAccessToken({prompt:''});
   }
+
+// ===== 임시 자동 테스트 3회 실행 시퀀스 =====
+function runAutoTest3Times(){
+  if(!_gToken){
+    toast('먼저 Google 계정으로 계속 버튼을 눌러 로그인해 주세요.'); return;
+  }
+  var btn=document.getElementById('btnAutoTest');
+  btn.textContent='테스트 실행 중…'; btn.disabled=true;
+  toast('자동 테스트 3회 시작...');
+
+  var dummyBase64='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+
+  // 1회차: 적합 매장
+  var t1_meta={m_store:'방이시장점',m_witness:'홍길동',m_inspector:'박찬욱',m_date:today(),m_summary:'이상 없음. 매우 양호함.',m_immediate:''};
+  var t1_state={};
+  allItems.forEach(function(it){ t1_state[it.id]={v:'ok',r:null,note:'',measure:it.m?'10':'',memo:''}; });
+
+  // 2회차: 부적합 매장 (q1 ng, A등급, 사진 1장)
+  var t2_meta={m_store:'명동본점',m_witness:'김철수',m_inspector:'강동현',m_date:today(),m_summary:'q1 항목 추락위험 긴급A 발견.',m_immediate:'계단 출입통제 및 임시 표지 부착'};
+  var t2_state={};
+  allItems.forEach(function(it){ t2_state[it.id]={v:'ok',r:null,note:'',measure:it.m?'10':'',memo:''}; });
+  t2_state['q1']={v:'ng',r:3,note:'계단 개방 틈새 30cm 발견되어 영유아 추락 우려',measure:'30',memo:'계단참 개방부'};
+
+  // 3회차: 해당없음 매장 (q25 na)
+  var t3_meta={m_store:'남영역점',m_witness:'이영희',m_inspector:'유준하',m_date:today(),m_summary:'고소 작업 장소 없음',m_immediate:''};
+  var t3_state={};
+  allItems.forEach(function(it){ t3_state[it.id]={v:'ok',r:null,note:'',measure:it.m?'10':'',memo:''}; });
+  t3_state['q25']={v:'na',r:null,note:'',measure:'',memo:'작업 높이 2m 미만으로 해당없음'};
+
+  sendTestRow(t1_meta,t1_state,[])
+  .then(function(){
+    toast('1/3 완료 (적합 매장)');
+    return sendTestRow(t2_meta,t2_state,[{url:dummyBase64,name:'item1_1.jpg'}]);
+  })
+  .then(function(){
+    toast('2/3 완료 (부적합/사진 매장)');
+    return sendTestRow(t3_meta,t3_state,[]);
+  })
+  .then(function(){
+    toast('3/3 완료 (해당없음 매장)');
+    alert('구글 연동 자동 테스트 3회가 모두 성공적으로 전송 완료되었습니다! Sheets(진단결과 집계)와 Drive(사진 폴더)를 확인해 보세요.');
+    btn.textContent='개발용 자동 테스트 3회 실행'; btn.disabled=false;
+  })
+  .catch(function(err){
+    alert('테스트 오류: '+err.message);
+    btn.textContent='개발용 자동 테스트 3회 실행'; btn.disabled=false;
+  });
+}
+
+function sendTestRow(meta,testState,testPhotos){
+  var oldState=state; var oldPhotos=photos;
+  state=testState; photos={};
+  
+  // 메타 폼 필드 입력값 강제 수정
+  Object.keys(meta).forEach(function(id){
+    var e=document.getElementById(id); if(e) e.value=meta[id];
+  });
+  
+  // 2회차 사진 데이터 가상 바인딩
+  if(testPhotos.length>0){
+    photos['q1']=testPhotos;
+  }
+
+  var row=buildRow();
+  
+  // 원래 상태 임시 복구용
+  return sheetsAppend(row).then(function(){
+    // 원복
+    state=oldState; photos=oldPhotos;
+    
+    if(testPhotos.length===0) return;
+    var folderName=(meta.m_date||today())+'_'+(meta.m_store||'매장').replace(/[^\w가-힣]/g,'_')+'_'+(meta.m_inspector||'');
+    return driveCreateFolder(folderName,PHOTO_FOLDER_ID).then(function(folder){
+      var fid=folder.id;
+      return driveUploadPhoto(testPhotos[0].url,testPhotos[0].name,fid);
+    });
+  });
+}
+
   function showLoginOverlay(){ document.getElementById('loginOverlay').classList.remove('hidden'); }
   function hideLoginOverlay(){ document.getElementById('loginOverlay').classList.add('hidden'); }
   function ensureToken(cb){
@@ -731,47 +841,13 @@ function repaintAll(){
     });
   }
 
-// ===== 내보내기 =====
-function csvCell(v){ v=(v==null?'':String(v)); if(/[",\n]/.test(v)) v='"'+v.replace(/"/g,'""')+'"'; return v; }
-function limViol(it){
-  if(!it.m||!it.m.limit) return '';
-  var raw=(state[it.id]&&state[it.id].measure)||''; var v=parseFloat(raw); var lim=it.m.limit;
-  if(raw===''||isNaN(v)) return '';
-  if(lim.op==='lte'&&v>lim.value) return 'Y(초과)';
-  if(lim.op==='gte'&&v>0&&v<lim.value) return 'Y(미달)';
-  return '';
-}
-function exportCSV(){
-  var m=getMeta(); var ct=counts();
-  var grade=ct.a>0?'A(긴급)':ct.b>0?'B(높음)':ct.c>0?'C(관찰)':(ct.done>0?'이상없음':'미점검');
-  var rows=[];
-  rows.push(['매장명',m.m_store,'점장/부점장',m.m_witness]);
-  rows.push(['진단위원',m.m_inspector,'진단일자',m.m_date]);
-  rows.push(['종합등급',grade,'부적합',ct.ng]);
-  rows.push(['긴급A/시급B/관찰C',ct.a+'/'+ct.b+'/'+ct.c]);
-  var totalPhoto=0; Object.keys(photos).forEach(function(k){ totalPhoto+=(photos[k]||[]).length; });
-  rows.push(['총 사진 수',totalPhoto+'장']);
-  rows.push([]);
-  rows.push(['No','영역','점검항목','판정','위험도','등급','실측','기준위반','기재','사진(장)','개선의견']);
-  var jmap={ok:'적합',ng:'부적합',na:'해당없음'};
-  SECTIONS.forEach(function(s){ s.items.forEach(function(it){
-    var st=state[it.id]||{}; var n=it.num||it.id.replace('q','');
-    rows.push([n,s.title,it.t,jmap[st.v]||'',st.r?(st.r+'점'):'',st.r?RISK[st.r].g:'',st.measure||'',limViol(it),(st.memo||'').replace(/\n/g,' '),(photos[it.id]||[]).length,(st.note||'').replace(/\n/g,' ')]);
-  });});
-  rows.push([]); rows.push(['종합의견',m.m_summary]); rows.push(['즉시조치',m.m_immediate]);
-  rows.push(['※ 사진 파일은 기기에서 직접 전송']);
-  var csv='\uFEFF'+rows.map(function(r){ return r.map(csvCell).join(','); }).join('\n');
-  var fn='중대재해진단_'+(m.m_store||'매장').replace(/[^\w가-힣]/g,'')+'_'+(m.m_date||today())+'.csv';
-  var blob=new Blob([csv],{type:'text/csv;charset=utf-8'}); var url=URL.createObjectURL(blob);
-  var a=document.createElement('a'); a.href=url; a.download=fn; document.body.appendChild(a); a.click();
-  setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); },200);
-  toast('CSV 내보내기 완료');
-}
+
+
 function today(){ var t=new Date(); return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'); }
 var toastTimer=null;
 function toast(msg){ var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(function(){ t.classList.remove('show'); },2000); }
 function newStore(){
-  if(!confirm('새 매장을 시작합니다. 현재 내용(사진 포함)이 초기화됩니다. 먼저 CSV를 내보내셨나요?')) return;
+  if(!confirm('새 매장을 시작합니다. 현재 내용(사진 포함)이 초기화됩니다.')) return;
   state={}; photos={};
   ['m_store','m_witness','m_summary','m_immediate'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
   repaintAll(); save(); toast('새 매장 준비 완료');
@@ -785,10 +861,10 @@ function init(){
   document.querySelectorAll('[data-measure]').forEach(function(mi){
     mi.addEventListener('input',function(){ var id=mi.getAttribute('data-measure'); ensure(id).measure=mi.value; evalLimit(id); touch(); });
   });
-  document.getElementById('btnExport').addEventListener('click',exportCSV);
-  document.getElementById('btnPrint').addEventListener('click',function(){ window.print(); });
   document.getElementById('btnSubmit').addEventListener('click',submitToGoogleDrive);
   document.getElementById('btnNew').addEventListener('click',newStore);
+  var bat=document.getElementById('btnAutoTest');
+  if(bat) bat.addEventListener('click',runAutoTest3Times);
   document.getElementById('btnGoogleLogin').addEventListener('click',function(){
     if(_gClient) _gClient.requestAccessToken({prompt:'select_account'});
     else toast('Google 클라이언트 ID를 먼저 설정하세요 (HTML 상단)');
