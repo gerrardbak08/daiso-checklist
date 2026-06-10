@@ -60,9 +60,28 @@ function doPost(e) {
   }
 }
 
-// ── GET 헬스체크 / 시트 접근 확인 ─────────────────────────────
+// ── GET: 행 제출 / 헬스체크 / 시트 확인 ───────────────────────
 function doGet(e) {
-  if (e && e.parameter && e.parameter.action === 'check') {
+  var action = e && e.parameter && e.parameter.action;
+
+  // 행 데이터 제출 (POST 리다이렉트 문제 우회 — GET CORS 정상)
+  if (action === 'submit') {
+    try {
+      var bytes   = Utilities.base64Decode(e.parameter.d);
+      var json    = Utilities.newBlob(bytes).getDataAsString('UTF-8');
+      var payload = JSON.parse(json);
+      var ss      = SpreadsheetApp.openById(SPREADSHEET_ID);
+      var sheet   = ss.getSheetByName(SHEET_NAME);
+      if (!sheet) sheet = ss.insertSheet(SHEET_NAME);
+      sheet.appendRow(payload.row);
+      return respond({ ok: true, rows: sheet.getLastRow() });
+    } catch(err) {
+      return respond({ ok: false, error: err.toString() });
+    }
+  }
+
+  // 시트 접근 확인
+  if (action === 'check') {
     try {
       var ss    = SpreadsheetApp.openById(SPREADSHEET_ID);
       var sheet = ss.getSheetByName(SHEET_NAME);
@@ -72,6 +91,7 @@ function doGet(e) {
       return respond({ status: 'alive', sheetAccess: false, error: err.toString() });
     }
   }
+
   return respond({ status: 'alive' });
 }
 
