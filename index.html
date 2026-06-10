@@ -11,7 +11,6 @@
 <meta property="og:image" content="https://gerrardbak08.github.io/daiso-checklist/og_thumbnail.png">
 <meta property="og:url" content="https://gerrardbak08.github.io/daiso-checklist/">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.css">
-<script src="https://accounts.google.com/gsi/client" onload="initGoogleAuthLib()" async></script>
 <style>
 :root{
   --bg:#f4f6f8; --surface:#fff; --surface-2:#f0f2f5;
@@ -167,27 +166,7 @@ details.lawref[open] summary .tg::after{content:'접기'}details.lawref summary 
 .lawtbl td.v{font-weight:700;color:var(--navy);word-break:break-word}
 .lawtbl td.src{color:var(--text-2);font-size:11.5px}
 .lawnote{font-size:11.5px;color:var(--text-2);line-height:1.55;padding:11px 15px;background:var(--warn-bg);border-top:1px solid var(--border)}
-/* ===== 로그인 오버레이 ===== */
-#loginOverlay{position:fixed;inset:0;z-index:200;background:rgba(10,20,40,.88);
-  display:flex;align-items:center;justify-content:center;padding:20px}
-#loginOverlay.hidden{display:none}
-.login-card{background:var(--surface);border-radius:16px;padding:36px 28px;
-  max-width:400px;width:100%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.28)}
-.login-logo{font-size:12px;color:var(--text-3);margin-bottom:10px;letter-spacing:.5px}
-.login-title{font-size:20px;font-weight:800;color:var(--navy);margin:0 0 10px;line-height:1.35}
-.login-desc{font-size:13.5px;color:var(--text-2);margin:0 0 26px;line-height:1.65}
-.login-google-btn{width:100%;min-height:52px;background:var(--navy);color:#fff;border:none;
-  border-radius:10px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px}
-.login-google-btn svg{width:20px;height:20px;flex-shrink:0}
-.login-google-btn:active{transform:scale(.98)}
-.login-skip{background:none;border:none;font-family:inherit;font-size:12.5px;
-  color:var(--text-3);cursor:pointer;text-decoration:underline;padding:4px}
-.auth-badge{display:none;align-items:center;gap:5px;background:rgba(255,255,255,.14);
-  border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:4px 10px;
-  font-size:11.5px;font-weight:600;white-space:nowrap;flex-shrink:0}
-.auth-badge.on{display:flex}
-.auth-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;flex-shrink:0}
+
 /* ===== 인쇄 ===== */
 @media print{
   :root{--fs:11pt}
@@ -204,23 +183,11 @@ details.lawref[open] summary .tg::after{content:'접기'}details.lawref summary 
 </style>
 </head>
 <body>
-<div id="loginOverlay" class="hidden">
-  <div class="login-card">
-    <div class="login-logo">㈜아성다이소 · 인사총무본부 안전보건팀</div>
-    <h2 class="login-title">중대재해 사전 예방<br>현장 진단 체크리스트</h2>
-    <p class="login-desc">Google 계정으로 로그인하면 진단 결과가<br><b>Google Sheets</b>에 자동 기록되고<br>사진은 <b>Google Drive</b>에 저장됩니다.</p>
-    <button class="login-google-btn no-print" id="btnGoogleLogin">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-      Google 계정으로 계속
-    </button>
-    <button class="login-skip no-print" id="btnLoginSkip">CSV 모드로 계속 (Drive 연동 없이)</button>
-  </div>
-</div>
 <header>
   <div class="hd-inner">
     <div class="hd-top">
       <div class="hd-title">중대재해 사전 예방 현장 진단 체크리스트<small>㈜아성다이소 안전보건팀 · 추락·전도 / 화재 / 고소작업 · 법적 기준 내장</small></div>
-      <div class="auth-badge no-print" id="authBadge"><span class="auth-dot"></span><span id="authEmail">연결됨</span></div>
+
     </div>
     <div class="hd-sum" id="sumBar">
       <span class="chip">점검 <b id="cProg">0</b>/<span id="cTotal">0</span></span>
@@ -353,7 +320,7 @@ details.lawref[open] summary .tg::after{content:'접기'}details.lawref summary 
     <div class="save-state" id="saveState"><span class="dot"></span><span id="saveTxt">자동 저장 대기</span></div>
     <button class="btn ghost" id="btnNew">새 매장</button>
     <button class="btn" id="btnCsv" style="color:var(--text-2)">CSV 내보내기</button>
-    <button class="btn primary" id="btnSubmit">☁ Google Drive 저장</button>
+    <button class="btn primary" id="btnSubmit">☁ Sheets 제출</button>
   </div>
 </div>
 <div id="toast"></div>
@@ -403,14 +370,11 @@ var SECTIONS=[
   ]},
 ];
 // =====================================================
-// Google 연동 설정 — 아래 3가지를 입력하세요
+// Apps Script 웹앱 URL — 배포 후 여기에 입력하세요
 // =====================================================
-var GOOGLE_CLIENT_ID  = '941733117289-t2n4arhrj78jpqsej8itddr81v9bk937.apps.googleusercontent.com'; // OAuth2 웹 클라이언트 ID
-var SPREADSHEET_ID    = '1GNMt-Dw6iap6SzCJtKa2bETajIxknRwYacPjXV_MaFg';   // Sheets URL /d/ 뒤 값
-var PHOTO_FOLDER_ID   = '1db5XJF_PxXNvFVgqVK1S264pXQiGxiAY';  // Drive 폴더 URL /folders/ 뒤 값
+var APPS_SCRIPT_URL = ''; // https://script.google.com/macros/s/.../exec
 // =====================================================
 
-var _gToken=null, _gTokenExpiry=0, _gClient=null, _gisReady=false;
 
 var RISK={1:{g:'C',l:'관찰'},2:{g:'B',l:'시급'},3:{g:'A',l:'긴급'}};
 var META_IDS=['m_store','m_inspector','m_date','m_witness','m_summary','m_immediate'];
@@ -628,169 +592,59 @@ function repaintAll(){
   updateSummary(); updatePhotoChip();
 }
 
-// ===== Google Drive 제출 =====
-// ===== Google 인증 (GIS Token Flow) =====
-  function initGoogleAuthLib(){
-    _gisReady=true; initGoogleClient();
+// ===== Apps Script 제출 =====
+function submitData(){
+  var m=getMeta();
+  if(!m.m_store){ toast('매장명을 선택하세요'); return; }
+  if(!m.m_inspector){ toast('진단위원을 선택하세요'); return; }
+  if(!APPS_SCRIPT_URL){
+    toast('⚠ APPS_SCRIPT_URL을 설정하세요 (HTML 상단)', 4000); return;
   }
-  function initGoogleClient(){
-    if(!_gisReady||!window.google||GOOGLE_CLIENT_ID.indexOf('YOUR_')===0) return;
-    if(location.protocol==='file:') return; // file:// 환경에서는 OAuth 불가
-    _gClient=google.accounts.oauth2.initTokenClient({
-      client_id:GOOGLE_CLIENT_ID,
-      scope:'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive',
-      callback:function(resp){
-        if(resp.error){
-          if(resp.error==='interaction_required'||resp.error==='access_denied') showLoginOverlay();
-          else toast('로그인 오류: '+resp.error);
-          return;
-        }
-        _gToken=resp.access_token;
-        _gTokenExpiry=Date.now()+(resp.expires_in-60)*1000;
-        hideLoginOverlay();
-        var email=resp.email||'연결됨';
-        document.getElementById('authEmail').textContent=email;
-        document.getElementById('authBadge').classList.add('on');
-        toast('Google Drive 연결 완료');
-      }
+  var btn=document.getElementById('btnSubmit');
+  btn.textContent='제출 중…'; btn.disabled=true;
+
+  var ct=counts();
+  var grade=ct.a>0?'A(긴급)':ct.b>0?'B(높음)':ct.c>0?'C(관찰)':'이상없음';
+  var jmap={ok:'적합',ng:'부적합',na:'해당없음'};
+  var row=[
+    new Date().toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}),
+    m.m_store||'',m.m_witness||'',m.m_inspector||'',m.m_date||'',
+    grade,ct.ng,ct.a,ct.b,ct.c
+  ];
+  allItems.forEach(function(it){
+    var st=state[it.id]||{};
+    row.push(jmap[st.v]||'',st.r?(st.r+'점'):'',st.memo||'');
+  });
+  row.push(m.m_summary||'',m.m_immediate||'');
+
+  var photoList=[];
+  Object.keys(photos).forEach(function(id){
+    var it=itemMap[id]; if(!it) return;
+    (photos[id]||[]).forEach(function(p,i){
+      photoList.push({url:p.url,name:'item'+it.num+'_'+(i+1)+'.jpg'});
     });
-    // 조용한 재연결 시도 (이미 동의한 경우 팝업 없이 토큰 발급)
-    _gClient.requestAccessToken({prompt:''});
-  }
+  });
 
+  if(photoList.length>0) btn.textContent='사진 전송 중…';
 
+  var folderName=(m.m_date||today())+'_'+(m.m_store||'매장').replace(/[^\w가-힣]/g,'_')+'_'+(m.m_inspector||'');
+  var payload={row:row,photos:photoList,folderName:folderName};
 
-  function showLoginOverlay(){ document.getElementById('loginOverlay').classList.remove('hidden'); }
-  function hideLoginOverlay(){ document.getElementById('loginOverlay').classList.add('hidden'); }
-  function resetSubmitBtn(){ var b=document.getElementById('btnSubmit'); if(b){ b.textContent='☁ Google Drive 저장'; b.disabled=false; } }
-  function ensureToken(cb){
-    if(_gToken&&Date.now()<_gTokenExpiry){ cb(); return; }
-    if(!_gClient){
-      resetSubmitBtn();
-      showLoginOverlay();
-      toast('Google 계정 연결이 필요합니다. 로그인 후 다시 시도해 주세요.');
-      return;
+  fetch(APPS_SCRIPT_URL,{method:'POST',body:JSON.stringify(payload)})
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    if(res.ok){
+      toast('제출 완료 ✔'+(res.photos>0?' — 사진 '+res.photos+'장 Drive 저장':''), 3000);
+    } else {
+      throw new Error(res.error||'시트 기록 실패');
     }
-    var orig=_gClient.callback;
-    // 60초 타임아웃: OAuth 팝업 닫혀도 callback 안 오면 버튼 복구
-    var tid=setTimeout(function(){
-      _gClient.callback=orig;
-      resetSubmitBtn();
-      toast('로그인 응답 없음. 팝업 차단 여부를 확인하거나 다시 시도해 주세요.', 4000);
-    }, 60000);
-    _gClient.callback=function(r){
-      clearTimeout(tid);
-      _gClient.callback=orig; orig(r);
-      if(!r.error){ cb(); }
-      else { resetSubmitBtn(); }
-    };
-    _gClient.requestAccessToken({prompt:'select_account'});
-  }
-
-// ===== Sheets / Drive 직접 API =====
-  function buildRow(){
-    var m=getMeta(); var ct=counts();
-    var grade=ct.a>0?'A(긴급)':ct.b>0?'B(높음)':ct.c>0?'C(관찰)':'이상없음';
-    var jmap={ok:'적합',ng:'부적합',na:'해당없음'};
-    var row=[
-      new Date().toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}),
-      m.m_store||'',m.m_witness||'',m.m_inspector||'',m.m_date||'',
-      grade,ct.ng,ct.a,ct.b,ct.c
-    ];
-    allItems.forEach(function(it){
-      var st=state[it.id]||{};
-      row.push(jmap[st.v]||'',st.r?(st.r+'점'):'',st.memo||'');
-    });
-    row.push(m.m_summary||'',m.m_immediate||'');
-    return row;
-  }
-  function sheetsAppend(row){
-    var url='https://sheets.googleapis.com/v4/spreadsheets/'+SPREADSHEET_ID
-      +'/values/'+encodeURIComponent('진단결과 집계!A1')
-      +':append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS';
-    return fetch(url,{method:'POST',
-      headers:{'Authorization':'Bearer '+_gToken,'Content-Type':'application/json'},
-      body:JSON.stringify({values:[row]})
-    }).then(function(r){ return r.json(); }).then(function(res){
-      if(res.error) throw new Error('Sheets 오류: '+res.error.message);
-      return res;
-    });
-  }
-  function driveCreateFolder(name,parentId){
-    return fetch('https://www.googleapis.com/drive/v3/files',{method:'POST',
-      headers:{'Authorization':'Bearer '+_gToken,'Content-Type':'application/json'},
-      body:JSON.stringify({name:name,mimeType:'application/vnd.google-apps.folder',parents:[parentId]})
-    }).then(function(r){ return r.json(); });
-  }
-  function driveUploadPhoto(base64DataUrl,fileName,folderId){
-    var b64=base64DataUrl.replace(/^data:image\/\w+;base64,/,'');
-    var bytes=atob(b64); var ab=new ArrayBuffer(bytes.length); var ia=new Uint8Array(ab);
-    for(var i=0;i<bytes.length;i++) ia[i]=bytes.charCodeAt(i);
-    var blob=new Blob([ab],{type:'image/jpeg'});
-    var meta=JSON.stringify({name:fileName,parents:[folderId]});
-    var form=new FormData();
-    form.append('metadata',new Blob([meta],{type:'application/json'}));
-    form.append('file',blob);
-    return fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{
-      method:'POST',headers:{'Authorization':'Bearer '+_gToken},body:form
-    }).then(function(r){ return r.json(); });
-  }
-  function submitToGoogleDrive(){
-    var m=getMeta();
-    if(!m.m_store){ toast('매장명을 선택하세요'); return; }
-    if(!m.m_inspector){ toast('진단위원을 선택하세요'); return; }
-    if(SPREADSHEET_ID.indexOf('YOUR_')===0){
-      toast('⚠ SPREADSHEET_ID를 설정하세요 (HTML 상단)'); return;
-    }
-    // _gClient 미설정이면 버튼 disabled 전에 차단
-    if(!_gToken&&!_gClient){
-      showLoginOverlay();
-      toast('Google 계정 연결이 필요합니다.');
-      return;
-    }
-    var btn=document.getElementById('btnSubmit');
-    btn.textContent='저장 중…'; btn.disabled=true;
-
-    ensureToken(function(){
-      // 1) Sheets에 행 추가
-      sheetsAppend(buildRow())
-      .then(function(){
-        // 2) 사진 업로드
-        var photoJobs=[];
-        Object.keys(photos).forEach(function(id){
-          var it=itemMap[id]; if(!it) return;
-          (photos[id]||[]).forEach(function(p,i){
-            photoJobs.push({url:p.url,name:'item'+it.num+'_'+(i+1)+'.jpg'});
-          });
-        });
-        if(photoJobs.length===0){
-          toast('Google Drive 저장 완료 ✓');
-          btn.textContent='☁ Google Drive 저장'; btn.disabled=false; return;
-        }
-        // 폴더 생성 후 사진 순차 업로드
-        var folderName=(m.m_date||today())+'_'+(m.m_store||'매장').replace(/[^\w가-힣]/g,'_')+'_'+(m.m_inspector||'');
-        driveCreateFolder(folderName,PHOTO_FOLDER_ID)
-        .then(function(folder){
-          var fid=folder.id; var done=0; var total=photoJobs.length;
-          function nextUp(){
-            if(done>=total){
-              toast('Google Drive 저장 완료 — 사진 '+total+'장 ✓');
-              btn.textContent='☁ Google Drive 저장'; btn.disabled=false; return;
-            }
-            btn.textContent='사진 '+(done+1)+'/'+total+' 업로드 중…';
-            driveUploadPhoto(photoJobs[done].url,photoJobs[done].name,fid)
-            .then(function(){ done++; nextUp(); })
-            .catch(function(){ done++; nextUp(); });
-          }
-          nextUp();
-        })
-        .catch(function(e){ toast('폴더 생성 오류: '+e.message); btn.textContent='☁ Google Drive 저장'; btn.disabled=false; });
-      })
-      .catch(function(e){ toast('저장 오류: '+e.message); btn.textContent='☁ Google Drive 저장'; btn.disabled=false; });
-    });
-  }
-
-
+    btn.textContent='☁ Sheets 제출'; btn.disabled=false;
+  })
+  .catch(function(err){
+    toast('제출 오류: '+err.message, 5000);
+    btn.textContent='☁ Sheets 제출'; btn.disabled=false;
+  });
+}
 
 function today(){ var t=new Date(); return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'); }
 var toastTimer=null;
@@ -837,42 +691,9 @@ function init(){
   document.querySelectorAll('[data-measure]').forEach(function(mi){
     mi.addEventListener('input',function(){ var id=mi.getAttribute('data-measure'); ensure(id).measure=mi.value; evalLimit(id); touch(); });
   });
-  document.getElementById('btnSubmit').addEventListener('click',submitToGoogleDrive);
+  document.getElementById('btnSubmit').addEventListener('click',submitData);
   document.getElementById('btnNew').addEventListener('click',newStore);
   document.getElementById('btnCsv').addEventListener('click',exportCsv);
-
-  document.getElementById('btnGoogleLogin').addEventListener('click',function(){
-    if(_gClient) _gClient.requestAccessToken({prompt:'select_account'});
-    else if(_gisReady) initGoogleClient();
-    else toast('Google 인증 라이브러리 로딩 중입니다. 잠시 후 다시 시도해 주세요.');
-  });
-  document.getElementById('btnLoginSkip').addEventListener('click',hideLoginOverlay);
-  // file:// 프로토콜 감지: Google OAuth는 HTTPS에서만 동작
-  var isFileProtocol = location.protocol === 'file:';
-  if(isFileProtocol){
-    var btn=document.getElementById('btnSubmit');
-    btn.disabled=true;
-    btn.title='Google Drive 저장은 HTTPS 환경에서만 동작합니다.\nhttps://gerrardbak08.github.io/daiso-checklist/ 에서 이용해 주세요.';
-    btn.textContent='☁ Drive (HTTPS 필요)';
-    btn.style.opacity='0.5';
-    // 상단 배너 안내
-    var banner=document.createElement('div');
-    banner.style.cssText='background:#a65c00;color:#fff;font-size:13px;font-weight:700;text-align:center;padding:8px 14px;position:sticky;top:0;z-index:50;';
-    banner.textContent='⚠ 로컬 파일(file://) 환경 — Google Drive 저장은 GitHub Pages에서만 동작합니다: gerrardbak08.github.io/daiso-checklist';
-    document.body.insertBefore(banner, document.body.firstChild);
-  }
-  // Google 클라이언트 ID 설정 여부 확인
-  if(GOOGLE_CLIENT_ID.indexOf('YOUR_')===0){
-    // 미설정: CSV 모드만 사용
-    document.getElementById('btnSubmit').style.display='none';
-  } else if(!isFileProtocol){
-    // 설정됨 + HTTPS: GIS가 이미 로드됐으면 바로 초기화, 아니면 onload(initGoogleAuthLib)에서 처리
-    if(_gisReady) initGoogleClient();
-    // GIS 로드 타임아웃 — 3초 내 로드 안 되면 오버레이 표시
-    setTimeout(function(){
-      if(!_gisReady){ showLoginOverlay(); }
-    }, 3000);
-  }
   var had=restore();
   if(!had) document.getElementById('m_date').value=today();
   repaintAll();
@@ -883,3 +704,4 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
 </script>
 </body>
 </html>
+
