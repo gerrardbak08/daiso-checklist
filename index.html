@@ -647,7 +647,10 @@ function submitData(){
   var folderName=(m.m_date||today())+'_'+(m.m_store||'매장').replace(/[^\w가-힣]/g,'_')+'_'+(m.m_inspector||'');
 
   // 행 데이터는 GET으로 제출 — CORS 정상 동작, 응답에서 ok:true 확인 가능
-  var b64=btoa(unescape(encodeURIComponent(JSON.stringify({row:row,folderName:folderName}))));
+  var json=JSON.stringify({row:row,folderName:folderName});
+  var bytes=new TextEncoder().encode(json);
+  var binary=''; for(var i=0;i<bytes.length;i++) binary+=String.fromCharCode(bytes[i]);
+  var b64=btoa(binary);
   fetch(APPS_SCRIPT_URL+'?action=submit&d='+encodeURIComponent(b64))
     .then(function(r){return r.json();})
     .then(function(d){
