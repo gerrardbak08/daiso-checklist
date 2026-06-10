@@ -671,7 +671,14 @@ function repaintAll(){
       return;
     }
     var orig=_gClient.callback;
+    // 60초 타임아웃: OAuth 팝업 닫혀도 callback 안 오면 버튼 복구
+    var tid=setTimeout(function(){
+      _gClient.callback=orig;
+      resetSubmitBtn();
+      toast('로그인 응답 없음. 팝업 차단 여부를 확인하거나 다시 시도해 주세요.', 4000);
+    }, 60000);
     _gClient.callback=function(r){
+      clearTimeout(tid);
       _gClient.callback=orig; orig(r);
       if(!r.error){ cb(); }
       else { resetSubmitBtn(); }
@@ -839,12 +846,26 @@ function init(){
     else toast('Google 인증 라이브러리 로딩 중입니다. 잠시 후 다시 시도해 주세요.');
   });
   document.getElementById('btnLoginSkip').addEventListener('click',hideLoginOverlay);
+  // file:// 프로토콜 감지: Google OAuth는 HTTPS에서만 동작
+  var isFileProtocol = location.protocol === 'file:';
+  if(isFileProtocol){
+    var btn=document.getElementById('btnSubmit');
+    btn.disabled=true;
+    btn.title='Google Drive 저장은 HTTPS 환경에서만 동작합니다.\nhttps://gerrardbak08.github.io/daiso-checklist/ 에서 이용해 주세요.';
+    btn.textContent='☁ Drive (HTTPS 필요)';
+    btn.style.opacity='0.5';
+    // 상단 배너 안내
+    var banner=document.createElement('div');
+    banner.style.cssText='background:#a65c00;color:#fff;font-size:13px;font-weight:700;text-align:center;padding:8px 14px;position:sticky;top:0;z-index:50;';
+    banner.textContent='⚠ 로컬 파일(file://) 환경 — Google Drive 저장은 GitHub Pages에서만 동작합니다: gerrardbak08.github.io/daiso-checklist';
+    document.body.insertBefore(banner, document.body.firstChild);
+  }
   // Google 클라이언트 ID 설정 여부 확인
   if(GOOGLE_CLIENT_ID.indexOf('YOUR_')===0){
     // 미설정: CSV 모드만 사용
     document.getElementById('btnSubmit').style.display='none';
-  } else {
-    // 설정됨: GIS가 이미 로드됐으면 바로 초기화, 아니면 onload(initGoogleAuthLib)에서 처리
+  } else if(!isFileProtocol){
+    // 설정됨 + HTTPS: GIS가 이미 로드됐으면 바로 초기화, 아니면 onload(initGoogleAuthLib)에서 처리
     if(_gisReady) initGoogleClient();
     // GIS 로드 타임아웃 — 3초 내 로드 안 되면 오버레이 표시
     setTimeout(function(){
