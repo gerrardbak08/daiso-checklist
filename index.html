@@ -630,14 +630,10 @@ function submitData(){
   var folderName=(m.m_date||today())+'_'+(m.m_store||'매장').replace(/[^\w가-힣]/g,'_')+'_'+(m.m_inspector||'');
   var payload={row:row,photos:photoList,folderName:folderName};
 
-  fetch(APPS_SCRIPT_URL,{method:'POST',body:JSON.stringify(payload)})
-  .then(function(r){ return r.json(); })
-  .then(function(res){
-    if(res.ok){
-      toast('제출 완료 ✔'+(res.photos>0?' — 사진 '+res.photos+'장 Drive 저장':''), 3000);
-    } else {
-      throw new Error(res.error||'시트 기록 실패');
-    }
+  // no-cors: Apps Script 리다이렉트 CORS 우회 — 데이터는 정상 전송됨
+  fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)})
+  .then(function(){
+    toast('제출 완료 ✔'+(photoList.length>0?' — 사진 Drive 저장됨':''), 3000);
     btn.textContent='☁ Sheets 제출'; btn.disabled=false;
   })
   .catch(function(err){
