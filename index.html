@@ -24,8 +24,9 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-size:16px;line-height:1.45}
 html{overflow-x:hidden}
-body{padding-bottom:148px;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;overflow-x:hidden}
+body{padding-bottom:180px;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;overflow-x:hidden}
 header{position:sticky;top:0;z-index:40;background:var(--navy);color:#fff;box-shadow:0 2px 8px rgba(20,30,45,.10)}
+.hd-inner{max-width:860px;margin:0 auto;width:100%}
 .hd-top{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px}
 .hd-title{font-size:15px;font-weight:700;letter-spacing:-.2px;flex:1;min-width:0;overflow-wrap:break-word;word-break:break-word}
 .hd-title small{display:block;font-size:11px;font-weight:500;color:#b9c6dc}
@@ -127,10 +128,10 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--navy-2);outline-
 .verdict.A .vg{background:var(--danger)}.verdict.B .vg{background:var(--warn)}.verdict.C .vg{background:var(--na-bg);color:var(--na)}.verdict.OK .vg{background:var(--ok)}
 .verdict .vt b{font-size:15px}.verdict .vt span{display:block;font-size:12.5px;color:var(--text-2);margin-top:2px}
 /* ===== 하단 ===== */
-.actionbar{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--surface);
-  border-top:1px solid var(--border);box-shadow:0 -2px 12px rgba(20,30,45,.10);
-  padding:10px 14px;padding-bottom:calc(10px + env(safe-area-inset-bottom));
-  display:flex;flex-direction:column;gap:7px}
+.actionbar{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:50;background:var(--surface);
+  border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 4px 20px rgba(20,30,45,.12);
+  padding:14px;width:calc(100% - 28px);max-width:860px;
+  display:flex;flex-direction:column;gap:8px}
 .ab-row1{display:flex;align-items:center;gap:8px}
 .ab-row2{display:flex;gap:8px}
 .save-state{flex-shrink:0;font-size:12px;color:var(--text-3);display:flex;align-items:center;gap:6px;max-width:80px;overflow:hidden}
@@ -145,7 +146,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--navy-2);outline-
   flex:1;min-height:52px;font-size:15px;letter-spacing:-.2px}
 .btn.ghost{color:var(--text-2)}
 .btn.sec{flex:1;min-height:42px;font-size:13px;color:var(--text-3);border-color:var(--border);background:var(--surface-2)}
-#toast{position:fixed;left:50%;bottom:148px;transform:translateX(-50%) translateY(10px);z-index:60;background:var(--ok);color:#fff;font-size:13.5px;font-weight:700;padding:11px 18px;border-radius:999px;box-shadow:0 2px 8px rgba(20,30,45,.10);opacity:0;pointer-events:none;transition:.2s}
+#toast{position:fixed;left:50%;bottom:180px;transform:translateX(-50%) translateY(10px);z-index:60;background:var(--ok);color:#fff;font-size:13.5px;font-weight:700;padding:11px 18px;border-radius:999px;box-shadow:0 2px 8px rgba(20,30,45,.10);opacity:0;pointer-events:none;transition:.2s}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .tip{font-size:11.5px;color:var(--text-3);line-height:1.5;padding:0 15px 14px}
 /* ===== 부록 ===== */
@@ -211,17 +212,19 @@ details.lawref[open] summary .tg::after{content:'접기'}details.lawref summary 
   </div>
 </div>
 <header>
-  <div class="hd-top">
-    <div class="hd-title">중대재해 사전 예방 현장 진단 체크리스트<small>㈜아성다이소 안전보건팀 · 추락·전도 / 화재 / 고소작업 · 법적 기준 내장</small></div>
-    <div class="auth-badge no-print" id="authBadge"><span class="auth-dot"></span><span id="authEmail">연결됨</span></div>
-  </div>
-  <div class="hd-sum" id="sumBar">
-    <span class="chip">점검 <b id="cProg">0</b>/<span id="cTotal">0</span></span>
-    <span class="chip dz">부적합 <b id="cNg">0</b></span>
-    <span class="chip az">긴급A <b id="cA">0</b></span>
-    <span class="chip">시급B <b id="cB">0</b></span>
-    <span class="chip">관찰C <b id="cC">0</b></span>
-    <span class="chip pz">사진 <b id="cPhoto">0</b>장</span>
+  <div class="hd-inner">
+    <div class="hd-top">
+      <div class="hd-title">중대재해 사전 예방 현장 진단 체크리스트<small>㈜아성다이소 안전보건팀 · 추락·전도 / 화재 / 고소작업 · 법적 기준 내장</small></div>
+      <div class="auth-badge no-print" id="authBadge"><span class="auth-dot"></span><span id="authEmail">연결됨</span></div>
+    </div>
+    <div class="hd-sum" id="sumBar">
+      <span class="chip">점검 <b id="cProg">0</b>/<span id="cTotal">0</span></span>
+      <span class="chip dz">부적합 <b id="cNg">0</b></span>
+      <span class="chip az">긴급A <b id="cA">0</b></span>
+      <span class="chip">시급B <b id="cB">0</b></span>
+      <span class="chip">관찰C <b id="cC">0</b></span>
+      <span class="chip pz">사진 <b id="cPhoto">0</b>장</span>
+    </div>
   </div>
 </header>
 <div class="wrap">
