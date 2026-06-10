@@ -319,8 +319,7 @@ details.lawref[open] summary .tg::after{content:'접기'}details.lawref summary 
   <div class="ab-row1">
     <div class="save-state" id="saveState"><span class="dot"></span><span id="saveTxt">자동 저장 대기</span></div>
     <button class="btn ghost" id="btnNew">새 매장</button>
-    <button class="btn" id="btnCsv" style="color:var(--text-2)">CSV 내보내기</button>
-    <button class="btn" id="btnTest" style="color:var(--text-3)">연결 테스트</button>
+    <button class="btn" id="btnCsv" style="color:var(--text-2)">CSV</button>
     <button class="btn primary" id="btnSubmit">☁ Sheets 제출</button>
   </div>
 </div>
@@ -719,7 +718,6 @@ function init(){
   document.getElementById('btnSubmit').addEventListener('click',submitData);
   document.getElementById('btnNew').addEventListener('click',newStore);
   document.getElementById('btnCsv').addEventListener('click',exportCsv);
-  document.getElementById('btnTest').addEventListener('click',testConnection);
   var had=restore();
   if(!had) document.getElementById('m_date').value=today();
   repaintAll();
