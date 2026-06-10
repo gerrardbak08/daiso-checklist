@@ -320,6 +320,7 @@ details.lawref[open] summary .tg::after{content:'접기'}details.lawref summary 
     <div class="save-state" id="saveState"><span class="dot"></span><span id="saveTxt">자동 저장 대기</span></div>
     <button class="btn ghost" id="btnNew">새 매장</button>
     <button class="btn" id="btnCsv" style="color:var(--text-2)">CSV 내보내기</button>
+    <button class="btn" id="btnTest" style="color:var(--text-3)">연결 테스트</button>
     <button class="btn primary" id="btnSubmit">☁ Sheets 제출</button>
   </div>
 </div>
@@ -372,7 +373,7 @@ var SECTIONS=[
 // =====================================================
 // Apps Script 웹앱 URL — 배포 후 여기에 입력하세요
 // =====================================================
-var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz6ULGMR2x4zbjdjzrx09nMp2sbcicCjPa0QBggeSMI25lMbvA1LCQxguoHPuJ1Tozu/exec';
+var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwtabb3x5OV8hpvyRTjw6pHC235tTad_VzcstPus-isOghozjAdRv4SHelcdBlTk-Lu/exec';
 // =====================================================
 
 
@@ -592,14 +593,32 @@ function repaintAll(){
   updateSummary(); updatePhotoChip();
 }
 
+// ===== Apps Script 연결 테스트 =====
+function testConnection(){
+  if(!APPS_SCRIPT_URL){ toast('⚠ APPS_SCRIPT_URL이 설정되지 않음',4000); return; }
+  var btn=document.getElementById('btnTest');
+  btn.textContent='테스트 중…'; btn.disabled=true;
+  fetch(APPS_SCRIPT_URL+'?action=check')
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d.sheetAccess){
+        toast('Apps Script 연결 정상 ✔ (시트 현재 '+d.rows+'행)',4000);
+      } else if(d.status==='alive'){
+        toast('⚠ Apps Script 응답은 있으나 시트 접근 불가 — 스크립트 권한 확인 필요',7000);
+      } else {
+        toast('응답: '+JSON.stringify(d),5000);
+      }
+    })
+    .catch(function(err){toast('연결 실패: '+err.message,5000);})
+    .then(function(){btn.textContent='연결 테스트'; btn.disabled=false;});
+}
+
 // ===== Apps Script 제출 =====
 function submitData(){
   var m=getMeta();
   if(!m.m_store){ toast('매장명을 선택하세요'); return; }
   if(!m.m_inspector){ toast('진단위원을 선택하세요'); return; }
-  if(!APPS_SCRIPT_URL){
-    toast('⚠ APPS_SCRIPT_URL을 설정하세요 (HTML 상단)', 4000); return;
-  }
+  if(!APPS_SCRIPT_URL){ toast('⚠ APPS_SCRIPT_URL을 설정하세요 (HTML 상단)',4000); return; }
   var btn=document.getElementById('btnSubmit');
   btn.textContent='제출 중…'; btn.disabled=true;
 
@@ -626,20 +645,37 @@ function submitData(){
   });
 
   if(photoList.length>0) btn.textContent='사진 전송 중…';
-
   var folderName=(m.m_date||today())+'_'+(m.m_store||'매장').replace(/[^\w가-힣]/g,'_')+'_'+(m.m_inspector||'');
   var payload={row:row,photos:photoList,folderName:folderName};
 
-  // no-cors: Apps Script 리다이렉트 CORS 우회 — 데이터는 정상 전송됨
-  fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)})
-  .then(function(){
-    toast('제출 완료 ✔'+(photoList.length>0?' — 사진 Drive 저장됨':''), 3000);
-    btn.textContent='☁ Sheets 제출'; btn.disabled=false;
-  })
-  .catch(function(err){
-    toast('제출 오류: '+err.message, 5000);
-    btn.textContent='☁ Sheets 제출'; btn.disabled=false;
-  });
+  // 제출 전 현재 행 수 확인 → 제출 → 4초 후 행 수 재확인으로 실제 저장 여부 검증
+  var prevRows=-1;
+  fetch(APPS_SCRIPT_URL+'?action=check')
+    .then(function(r){return r.json();})
+    .then(function(d){prevRows=d.rows!=null?d.rows:-1;})
+    .catch(function(){})
+    .then(function(){
+      return fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)});
+    })
+    .then(function(){
+      btn.textContent='저장 확인 중…';
+      return new Promise(function(res){setTimeout(res,4000);});
+    })
+    .then(function(){
+      return fetch(APPS_SCRIPT_URL+'?action=check')
+        .then(function(r){return r.json();})
+        .then(function(d){
+          var newRows=d.rows!=null?d.rows:-1;
+          if(prevRows>=0&&newRows>prevRows){
+            toast('제출 완료 ✔ 시트에 저장됨'+(photoList.length>0?' + Drive 사진':''),3500);
+          } else {
+            toast('⚠ 시트 미반영 — [연결 테스트]로 Apps Script 권한 확인 필요',7000);
+          }
+        })
+        .catch(function(){toast('전송됨 — 시트를 직접 확인하세요',4000);});
+    })
+    .catch(function(err){toast('제출 오류: '+err.message,5000);})
+    .then(function(){btn.textContent='☁ Sheets 제출'; btn.disabled=false;});
 }
 
 function today(){ var t=new Date(); return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'); }
@@ -690,6 +726,7 @@ function init(){
   document.getElementById('btnSubmit').addEventListener('click',submitData);
   document.getElementById('btnNew').addEventListener('click',newStore);
   document.getElementById('btnCsv').addEventListener('click',exportCsv);
+  document.getElementById('btnTest').addEventListener('click',testConnection);
   var had=restore();
   if(!had) document.getElementById('m_date').value=today();
   repaintAll();

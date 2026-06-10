@@ -20,6 +20,9 @@ var SHEET_NAME      = '진단결과 집계';
 // ── POST 수신 (체크리스트 제출) ────────────────────────────────
 function doPost(e) {
   try {
+    if (!e || !e.postData || !e.postData.contents) {
+      return respond({ ok: false, error: 'POST body 없음' });
+    }
     var payload = JSON.parse(e.postData.contents);
 
     // 1) Sheets 행 추가
@@ -57,8 +60,18 @@ function doPost(e) {
   }
 }
 
-// ── GET 헬스체크 ───────────────────────────────────────────────
+// ── GET 헬스체크 / 시트 접근 확인 ─────────────────────────────
 function doGet(e) {
+  if (e && e.parameter && e.parameter.action === 'check') {
+    try {
+      var ss    = SpreadsheetApp.openById(SPREADSHEET_ID);
+      var sheet = ss.getSheetByName(SHEET_NAME);
+      var rows  = sheet ? sheet.getLastRow() : 0;
+      return respond({ status: 'alive', sheetAccess: true, rows: rows });
+    } catch(err) {
+      return respond({ status: 'alive', sheetAccess: false, error: err.toString() });
+    }
+  }
   return respond({ status: 'alive' });
 }
 
