@@ -648,7 +648,7 @@ function submitData(){
 
   // 행 데이터는 GET으로 제출 — CORS 정상 동작, 응답에서 ok:true 확인 가능
   var b64=btoa(unescape(encodeURIComponent(JSON.stringify({row:row,folderName:folderName}))));
-  fetch(APPS_SCRIPT_URL+'?action=submit&d='+b64)
+  fetch(APPS_SCRIPT_URL+'?action=submit&d='+encodeURIComponent(b64))
     .then(function(r){return r.json();})
     .then(function(d){
       if(d.ok){
