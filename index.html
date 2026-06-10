@@ -346,14 +346,14 @@ details.lawref[open] summary .tg::after{content:'접기'}details.lawref summary 
     </div>
     <div class="lawnote">※ 본 기준은 공개 법령에서 발췌한 <b>참고치</b>입니다. 매장의 용도·규모·사용승인 시점에 따라 적용 법령과 수치가 달라질 수 있으므로, <b>개선 시행 전 현행 법령 및 법무·건축 검토로 확정</b>하시기 바랍니다. 주택건설기준의 간살 10cm·난간 120cm는 공동주택 기준으로, 판매·근린생활시설에는 영유아 안전 확보를 위한 권장 준용치로 적용합니다.</div>
   </details>
-  <p class="tip no-print">※ 사진은 기기에 자동으로 저장되지 않으며 <b>새로고침 시 사라집니다</b>. 진단 완료 후 반드시 「CSV 내보내기」·「인쇄」로 결과를 저장하세요. 텍스트 입력은 자동저장됩니다.</p>
+  <p class="tip no-print">※ 사진은 기기에 자동으로 저장되지 않으며 <b>새로고침 시 사라집니다</b>. 진단 완료 후 반드시 「Google Drive 저장」 또는 「인쇄」로 결과를 저장하세요. 텍스트 입력은 자동저장됩니다.</p>
 </div>
 <div class="actionbar no-print">
   <div class="ab-row1">
     <div class="save-state" id="saveState"><span class="dot"></span><span id="saveTxt">자동 저장 대기</span></div>
     <button class="btn ghost" id="btnNew">새 매장</button>
+    <button class="btn" id="btnCsv" style="color:var(--text-2)">CSV 내보내기</button>
     <button class="btn primary" id="btnSubmit">☁ Google Drive 저장</button>
-    <button class="btn" id="btnAutoTest" style="background:var(--danger);color:#fff;border-color:var(--danger)">개발용 자동 테스트 3회 실행</button>
   </div>
 </div>
 <div id="toast"></div>
@@ -657,91 +657,25 @@ function repaintAll(){
     _gClient.requestAccessToken({prompt:''});
   }
 
-// ===== 임시 자동 테스트 3회 실행 시퀀스 =====
-function runAutoTest3Times(){
-  if(!_gToken){
-    toast('먼저 Google 계정으로 계속 버튼을 눌러 로그인해 주세요.'); return;
-  }
-  var btn=document.getElementById('btnAutoTest');
-  btn.textContent='테스트 실행 중…'; btn.disabled=true;
-  toast('자동 테스트 3회 시작...');
 
-  var dummyBase64='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-
-  // 1회차: 적합 매장
-  var t1_meta={m_store:'방이시장점',m_witness:'홍길동',m_inspector:'박찬욱',m_date:today(),m_summary:'이상 없음. 매우 양호함.',m_immediate:''};
-  var t1_state={};
-  allItems.forEach(function(it){ t1_state[it.id]={v:'ok',r:null,note:'',measure:it.m?'10':'',memo:''}; });
-
-  // 2회차: 부적합 매장 (q1 ng, A등급, 사진 1장)
-  var t2_meta={m_store:'명동본점',m_witness:'김철수',m_inspector:'강동현',m_date:today(),m_summary:'q1 항목 추락위험 긴급A 발견.',m_immediate:'계단 출입통제 및 임시 표지 부착'};
-  var t2_state={};
-  allItems.forEach(function(it){ t2_state[it.id]={v:'ok',r:null,note:'',measure:it.m?'10':'',memo:''}; });
-  t2_state['q1']={v:'ng',r:3,note:'계단 개방 틈새 30cm 발견되어 영유아 추락 우려',measure:'30',memo:'계단참 개방부'};
-
-  // 3회차: 해당없음 매장 (q25 na)
-  var t3_meta={m_store:'남영역점',m_witness:'이영희',m_inspector:'유준하',m_date:today(),m_summary:'고소 작업 장소 없음',m_immediate:''};
-  var t3_state={};
-  allItems.forEach(function(it){ t3_state[it.id]={v:'ok',r:null,note:'',measure:it.m?'10':'',memo:''}; });
-  t3_state['q25']={v:'na',r:null,note:'',measure:'',memo:'작업 높이 2m 미만으로 해당없음'};
-
-  sendTestRow(t1_meta,t1_state,[])
-  .then(function(){
-    toast('1/3 완료 (적합 매장)');
-    return sendTestRow(t2_meta,t2_state,[{url:dummyBase64,name:'item1_1.jpg'}]);
-  })
-  .then(function(){
-    toast('2/3 완료 (부적합/사진 매장)');
-    return sendTestRow(t3_meta,t3_state,[]);
-  })
-  .then(function(){
-    toast('3/3 완료 (해당없음 매장)');
-    alert('구글 연동 자동 테스트 3회가 모두 성공적으로 전송 완료되었습니다! Sheets(진단결과 집계)와 Drive(사진 폴더)를 확인해 보세요.');
-    btn.textContent='개발용 자동 테스트 3회 실행'; btn.disabled=false;
-  })
-  .catch(function(err){
-    alert('테스트 오류: '+err.message);
-    btn.textContent='개발용 자동 테스트 3회 실행'; btn.disabled=false;
-  });
-}
-
-function sendTestRow(meta,testState,testPhotos){
-  var oldState=state; var oldPhotos=photos;
-  state=testState; photos={};
-  
-  // 메타 폼 필드 입력값 강제 수정
-  Object.keys(meta).forEach(function(id){
-    var e=document.getElementById(id); if(e) e.value=meta[id];
-  });
-  
-  // 2회차 사진 데이터 가상 바인딩
-  if(testPhotos.length>0){
-    photos['q1']=testPhotos;
-  }
-
-  var row=buildRow();
-  
-  // 원래 상태 임시 복구용
-  return sheetsAppend(row).then(function(){
-    // 원복
-    state=oldState; photos=oldPhotos;
-    
-    if(testPhotos.length===0) return;
-    var folderName=(meta.m_date||today())+'_'+(meta.m_store||'매장').replace(/[^\w가-힣]/g,'_')+'_'+(meta.m_inspector||'');
-    return driveCreateFolder(folderName,PHOTO_FOLDER_ID).then(function(folder){
-      var fid=folder.id;
-      return driveUploadPhoto(testPhotos[0].url,testPhotos[0].name,fid);
-    });
-  });
-}
 
   function showLoginOverlay(){ document.getElementById('loginOverlay').classList.remove('hidden'); }
   function hideLoginOverlay(){ document.getElementById('loginOverlay').classList.add('hidden'); }
+  function resetSubmitBtn(){ var b=document.getElementById('btnSubmit'); if(b){ b.textContent='☁ Google Drive 저장'; b.disabled=false; } }
   function ensureToken(cb){
     if(_gToken&&Date.now()<_gTokenExpiry){ cb(); return; }
-    if(!_gClient){ toast('Google 연동이 설정되지 않았습니다'); return; }
+    if(!_gClient){
+      resetSubmitBtn();
+      showLoginOverlay();
+      toast('Google 계정 연결이 필요합니다. 로그인 후 다시 시도해 주세요.');
+      return;
+    }
     var orig=_gClient.callback;
-    _gClient.callback=function(r){ _gClient.callback=orig; orig(r); if(!r.error) cb(); };
+    _gClient.callback=function(r){
+      _gClient.callback=orig; orig(r);
+      if(!r.error){ cb(); }
+      else { resetSubmitBtn(); }
+    };
     _gClient.requestAccessToken({prompt:'select_account'});
   }
 
@@ -795,9 +729,16 @@ function sendTestRow(meta,testState,testPhotos){
   }
   function submitToGoogleDrive(){
     var m=getMeta();
-    if(!m.m_store){ toast('매장명을 입력하세요'); return; }
+    if(!m.m_store){ toast('매장명을 선택하세요'); return; }
+    if(!m.m_inspector){ toast('진단위원을 선택하세요'); return; }
     if(SPREADSHEET_ID.indexOf('YOUR_')===0){
       toast('⚠ SPREADSHEET_ID를 설정하세요 (HTML 상단)'); return;
+    }
+    // _gClient 미설정이면 버튼 disabled 전에 차단
+    if(!_gToken&&!_gClient){
+      showLoginOverlay();
+      toast('Google 계정 연결이 필요합니다.');
+      return;
     }
     var btn=document.getElementById('btnSubmit');
     btn.textContent='저장 중…'; btn.disabled=true;
@@ -845,13 +786,40 @@ function sendTestRow(meta,testState,testPhotos){
 
 function today(){ var t=new Date(); return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'); }
 var toastTimer=null;
-function toast(msg){ var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(function(){ t.classList.remove('show'); },2000); }
+function toast(msg,dur){ var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(function(){ t.classList.remove('show'); },dur||2500); }
 function newStore(){
   if(!confirm('새 매장을 시작합니다. 현재 내용(사진 포함)이 초기화됩니다.')) return;
   state={}; photos={};
-  ['m_store','m_witness','m_summary','m_immediate'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+  ['m_store','m_inspector','m_witness','m_summary','m_immediate'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+  document.getElementById('m_date').value=today();
   repaintAll(); save(); toast('새 매장 준비 완료');
   window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function exportCsv(){
+  var m=getMeta(); var ct=counts();
+  var grade=ct.a>0?'A(긴급)':ct.b>0?'B(높음)':ct.c>0?'C(관찰)':'이상없음';
+  var jmap={ok:'적합',ng:'부적합',na:'해당없음'};
+  var headers=['제출일시','매장명','입회자','진단위원','진단일자','종합등급','부적합건수','긴급A','시급B','관찰C'];
+  allItems.forEach(function(it){ headers.push(it.num+'_판정',it.num+'_위험도',it.num+'_메모'); });
+  headers.push('종합의견','즉시조치');
+  var row=[
+    new Date().toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}),
+    m.m_store||'',m.m_witness||'',m.m_inspector||'',m.m_date||'',
+    grade,ct.ng,ct.a,ct.b,ct.c
+  ];
+  allItems.forEach(function(it){
+    var st=state[it.id]||{};
+    row.push(jmap[st.v]||'',st.r?(st.r+'점'):'',st.memo||'');
+  });
+  row.push(m.m_summary||'',m.m_immediate||'');
+  var csv=[headers,row].map(function(r){ return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(','); }).join('\n');
+  var bom='\uFEFF';
+  var blob=new Blob([bom+csv],{type:'text/csv;charset=utf-8'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=(m.m_date||today())+'_'+(m.m_store||'매장')+'_진단결과.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  toast('CSV 내보내기 완료');
 }
 
 // ===== 초기화 =====
@@ -863,20 +831,25 @@ function init(){
   });
   document.getElementById('btnSubmit').addEventListener('click',submitToGoogleDrive);
   document.getElementById('btnNew').addEventListener('click',newStore);
-  var bat=document.getElementById('btnAutoTest');
-  if(bat) bat.addEventListener('click',runAutoTest3Times);
+  document.getElementById('btnCsv').addEventListener('click',exportCsv);
+
   document.getElementById('btnGoogleLogin').addEventListener('click',function(){
     if(_gClient) _gClient.requestAccessToken({prompt:'select_account'});
-    else toast('Google 클라이언트 ID를 먼저 설정하세요 (HTML 상단)');
+    else if(_gisReady) initGoogleClient();
+    else toast('Google 인증 라이브러리 로딩 중입니다. 잠시 후 다시 시도해 주세요.');
   });
   document.getElementById('btnLoginSkip').addEventListener('click',hideLoginOverlay);
-  // Google 클라이언트 ID가 설정된 경우에만 오버레이 표시
+  // Google 클라이언트 ID 설정 여부 확인
   if(GOOGLE_CLIENT_ID.indexOf('YOUR_')===0){
-    // 미설정: Drive 기능 없이 CSV 모드
+    // 미설정: CSV 모드만 사용
+    document.getElementById('btnSubmit').style.display='none';
   } else {
-    // 설정됨: GIS가 이미 로드됐으면 바로, 아니면 onload에서 처리
+    // 설정됨: GIS가 이미 로드됐으면 바로 초기화, 아니면 onload(initGoogleAuthLib)에서 처리
     if(_gisReady) initGoogleClient();
-    // onload에서도 initGoogleClient 호출되므로 자동 연결 시도됨
+    // GIS 로드 타임아웃 — 3초 내 로드 안 되면 오버레이 표시
+    setTimeout(function(){
+      if(!_gisReady){ showLoginOverlay(); }
+    }, 3000);
   }
   var had=restore();
   if(!had) document.getElementById('m_date').value=today();
