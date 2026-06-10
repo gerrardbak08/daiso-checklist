@@ -67,9 +67,7 @@ function doGet(e) {
   // 행 데이터 제출 (POST 리다이렉트 문제 우회 — GET CORS 정상)
   if (action === 'submit') {
     try {
-      var bytes   = Utilities.base64Decode(e.parameter.d);
-      var json    = Utilities.newBlob(bytes).getDataAsString('UTF-8');
-      var payload = JSON.parse(json);
+      var payload = JSON.parse(e.parameter.d);
       var ss      = SpreadsheetApp.openById(SPREADSHEET_ID);
       var sheet   = ss.getSheetByName(SHEET_NAME);
       if (!sheet) sheet = ss.insertSheet(SHEET_NAME);
