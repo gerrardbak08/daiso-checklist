@@ -647,8 +647,10 @@ function submitData(){
   var folderName=(m.m_date||today())+'_'+(m.m_store||'매장').replace(/[^\w가-힣]/g,'_')+'_'+(m.m_inspector||'');
 
   // 행 데이터는 GET으로 제출 — CORS 정상 동작, 응답에서 ok:true 확인 가능
-  var qs=encodeURIComponent(JSON.stringify({row:row,folderName:folderName}));
-  fetch(APPS_SCRIPT_URL+'?action=submit&d='+qs)
+  // 한국어를 \uXXXX 이스케이프로 변환 → URL에 비ASCII 문자 없이 전송
+  var jsonStr=JSON.stringify({row:row,folderName:folderName})
+    .replace(/[^\x00-\x7F]/g,function(c){return'\\u'+('0000'+c.charCodeAt(0).toString(16)).slice(-4);});
+  fetch(APPS_SCRIPT_URL+'?action=submit&d='+encodeURIComponent(jsonStr))
     .then(function(r){return r.json();})
     .then(function(d){
       if(d.ok){
